@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UltraOS</title>
+    <style>
+        * { cursor: url('cursor.cur'), auto; }
+        body {
+            font-family: 'Verdana', sans-serif;
+            background-color: #004b8d;
+            color: white;
+            margin: 0;
+            padding: 10px;
+            position: relative; /* Needed for selection */
+            user-select: none; /* Prevent text selection */
+        }
+        .window {
+            width: 400px;
+            height: 300px;
+            background-color: #c0c0c0;
+            border: 2px solid black;
+            padding: 10px;
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            box-shadow: 5px 5px 5px #333;
+            cursor: move;
+        }
+        .window.dragging {
+            opacity: 0.6; /* Semi-transparent effect */
+            outline: 2px solid lightblue; /* Light blue border */
+        }
+        .title-bar {
+            background-color: #000080;
+            color: white;
+            padding: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            cursor: move;
+        }
+        .close-button {
+            cursor: pointer;
+            background-color: red;
+            color: white;
+            padding: 2px 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background-color: #808080;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+            box-shadow: 0px -3px 5px #333;
+        }
+        .start-menu {
+            background-color: #c0c0c0;
+            border: 2px solid black;
+            box-shadow: 3px 3px 3px #333;
+            padding: 5px;
+            display: none;
+            position: absolute;
+            bottom: 50px;
+            left: 10px;
+        }
+        .time {
+            margin-right: 10px;
+        }
+        .personalization {
+            display: none;
+            width: 300px;
+            height: 150px;
+            background-color: #c0c0c0;
+            border: 2px solid black;
+            padding: 10px;
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            box-shadow: 5px 5px 5px #333;
+        }
+        .context-menu {
+            display: none;
+            position: absolute;
+            background-color: #c0c0c0;
+            border: 2px solid black;
+            box-shadow: 5px 5px 5px #333;
+            padding: 5px;
+            z-index: 1000;
+        }
+        .icon img {
+            width: 24px;
+            height: 24px;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        .icon {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+            position: absolute;
+        }
+        #selection-box {
+            position: absolute;
+            background-color: rgba(173, 216, 230, 0.4);
+            border: 2px solid lightblue;
+            display: none;
+            z-index: 1; /* Ensures it appears below icons */
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+    <div id="selection-box"></div>
+
+    <div class="window" id="menuWindow">
+        <div class="title-bar" onmousedown="dragStart(event, this.parentNode)">
+            <span>UltraOS - Retro Window</span>
+            <button class="close-button" onclick="closeMenu()">X</button>
+        </div>
+    </div>
+
+    <!-- Original Files -->
+    <div class="icon" onclick="openBrowser()" style="top: 100px; left: 50px;">
+        <img src="shortcut.png" alt="Chrome Icon">
+        <span>Chrome</span>
+    </div>
+
+    <div class="icon" onclick="alert('Running networking.bat!')" style="top: 150px; left: 50px;">
+        <img src="batch.png" alt="Batch Icon">
+        <span>networking.bat</span>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <button onclick="toggleStartMenu()">Start</button>
+        <span class="time" id="time"></span>
+    </div>
+
+    <!-- Start Menu -->
+    <div class="start-menu" id="startMenu">
+        <div onclick="openBrowser()">Open Chrome</div>
+        <div onclick="alert('Launching networking.bat!')">Run networking.bat</div>
+    </div>
+
+    <!-- Personalization Window -->
+    <div class="personalization" id="personalizationWindow">
+        <div class="title-bar" onmousedown="dragStart(event, this.parentNode)">
+            <span>Personalization</span>
+            <button class="close-button" onclick="closePersonalization()">X</button>
+        </div>
+        <label>Choose Background Color:</label>
+        <input type="color" id="bgColorPicker" onchange="changeBackground()">
+    </div>
+
+    <!-- Custom Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div onclick="alert('Refresh UltraOS')">Refresh</div>
+        <div onclick="alert('Open Settings')">Settings</div>
+        <div onclick="alert('About UltraOS')">About</div>
+    </div>
+
+    <script>
+        function closeMenu() {
+            document.getElementById('menuWindow').style.display = 'none';
+        }
+
+        function toggleStartMenu() {
+            let menu = document.getElementById("startMenu");
+            menu.style.display = (menu.style.display === "block") ? "none" : "block";
+        }
+
+        function updateTime() {
+            document.getElementById("time").innerText = new Date().toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        function dragStart(event, element) {
+            let offsetX = event.clientX - element.getBoundingClientRect().left;
+            let offsetY = event.clientY - element.getBoundingClientRect().top;
+            element.classList.add("dragging");
+
+            function moveWindow(event) {
+                element.style.left = event.clientX - offsetX + "px";
+                element.style.top = event.clientY - offsetY + "px";
+            }
+
+            function stopDragging() {
+                element.classList.remove("dragging");
+                document.removeEventListener("mousemove", moveWindow);
+                document.removeEventListener("mouseup", stopDragging);
+            }
+
+            document.addEventListener("mousemove", moveWindow);
+            document.addEventListener("mouseup", stopDragging);
+        }
+
+        function closePersonalization() {
+            document.getElementById('personalizationWindow').style.display = 'none';
+        }
+
+        function changeBackground() {
+            document.body.style.backgroundColor = document.getElementById("bgColorPicker").value;
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.altKey && event.key.toLowerCase() === 'p') {
+                document.getElementById('personalizationWindow').style.display = 'block';
+            }
+        });
+
+        let selectionBox = document.getElementById("selection-box");
+        let isSelecting = false;
+        let startX, startY;
+
+        document.addEventListener("mousedown", (event) => {
+            if (event.target === document.body) {
+                isSelecting = true;
+                startX = event.clientX;
+                startY = event.clientY;
+                selectionBox.style.left = startX + "px";
+                selectionBox.style.top = startY + "px";
+                selectionBox.style.width = "0px";
+                selectionBox.style.height = "0px";
+                selectionBox.style.display = "block";
+            }
+        });
+
+        document.addEventListener("mouseup", () => {
+            isSelecting = false;
+            selectionBox.style.display = "none";
+        });
+    </script>
+</body>
+</html>

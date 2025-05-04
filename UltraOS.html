@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UltraOS</title>
+    <style>
+        * { 
+            cursor: url('cursor.cur'), auto; /* Apply cursor globally */
+        }
+        body {
+            font-family: 'Verdana', sans-serif;
+            background-color: #004b8d;
+            color: white;
+            margin: 0;
+            padding: 10px;
+        }
+        .window {
+            width: 400px;
+            height: 300px;
+            background-color: #c0c0c0;
+            border: 2px solid black;
+            padding: 10px;
+            position: absolute;
+            box-shadow: 5px 5px 5px #333;
+        }
+        .title-bar {
+            background-color: #000080;
+            color: white;
+            padding: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        .close-button {
+            cursor: pointer;
+            background-color: red;
+            color: white;
+            padding: 2px 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .icon {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            position: absolute;
+        }
+        .icon img {
+            width: 32px;
+            height: 32px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .context-menu {
+            display: none;
+            position: absolute;
+            background-color: #c0c0c0;
+            border: 2px solid black;
+            box-shadow: 5px 5px 5px #333;
+            padding: 5px;
+            z-index: 1000;
+        }
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background-color: #808080;
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            box-shadow: 0px -3px 5px #333;
+        }
+        .new-dropdown {
+            display: none;
+            position: absolute;
+            background-color: #c0c0c0;
+            border: 2px solid black;
+            box-shadow: 3px 3px 3px #333;
+            padding: 5px;
+            left: 100px;
+            top: 0;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+    <div class="window" id="menuWindow">
+        <div class="title-bar">
+            <span>UltraOS - Retro Window</span>
+            <button class="close-button" onclick="closeMenu()">X</button>
+        </div>
+    </div>
+
+    <!-- Original Files -->
+    <div class="icon" onclick="openBrowser()" style="top: 100px; left: 50px;">
+        <img src="shortcut.png" alt="Chrome Icon">
+        <span>Chrome</span>
+    </div>
+
+    <div class="icon" onclick="alert('Running networking.bat!')" style="top: 150px; left: 50px;">
+        <img src="batch.png" alt="Batch Icon">
+        <span>networking.bat</span>
+    </div>
+
+    <!-- Custom Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div onclick="alert('Refresh UltraOS')">Refresh</div>
+        <div onclick="alert('Open Settings')">Settings</div>
+        <div onclick="alert('About UltraOS')">About</div>
+        <div onmouseover="showDropdown()" onmouseout="hideDropdown()">New ▸
+            <div class="new-dropdown" id="newDropdown">
+                <div onclick="createBatch()">Batch Script</div>
+                <div onclick="createShortcut()">New Shortcut</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <span style="margin-left: 10px;">UltraOS Taskbar</span>
+    </div>
+
+    <script>
+        function closeMenu() {
+            document.getElementById('menuWindow').style.display = 'none';
+        }
+
+        function openBrowser() {
+            let browserWindow = document.createElement("div");
+            browserWindow.className = "window";
+            browserWindow.style.top = "100px";
+            browserWindow.style.left = "200px";
+            browserWindow.innerHTML = `
+                <div class="title-bar">
+                    <span>UltraOS - Chrome</span>
+                    <button class="close-button" onclick="this.parentNode.parentNode.remove()">X</button>
+                </div>
+                <iframe src="https://www.google.com" width="100%" height="90%"></iframe>`;
+            document.body.appendChild(browserWindow);
+        }
+
+        function showDropdown() {
+            document.getElementById("newDropdown").style.display = "block";
+        }
+
+        function hideDropdown() {
+            document.getElementById("newDropdown").style.display = "none";
+        }
+
+        function createBatch() {
+            let batchFile = document.createElement("div");
+            batchFile.className = "icon";
+            batchFile.style.top = Math.random() * 500 + "px";
+            batchFile.style.left = Math.random() * 500 + "px";
+            batchFile.innerHTML = '<img src="batch.png" alt="Batch Icon"><span>NewScript.bat</span>';
+            batchFile.onclick = () => alert('Running NewScript.bat!');
+            document.body.appendChild(batchFile);
+        }
+
+        function createShortcut() {
+            let shortcut = document.createElement("div");
+            shortcut.className = "icon";
+            shortcut.style.top = Math.random() * 500 + "px";
+            shortcut.style.left = Math.random() * 500 + "px";
+            shortcut.innerHTML = '<img src="shortcut.png" alt="Shortcut Icon"><span>New Shortcut</span>';
+            shortcut.onclick = () => alert('Opening Shortcut!');
+            document.body.appendChild(shortcut);
+        }
+
+        document.addEventListener("contextmenu", function(event) {
+            event.preventDefault();
+            let menu = document.getElementById("contextMenu");
+            menu.style.left = event.pageX + "px";
+            menu.style.top = event.pageY + "px";
+            menu.style.display = "block";
+        });
+
+        document.addEventListener("click", function() {
+            document.getElementById("contextMenu").style.display = "none";
+            document.getElementById("newDropdown").style.display = "none";
+        });
+    </script>
+</body>
+</html>
